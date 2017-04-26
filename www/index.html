@@ -1,0 +1,92 @@
+<html>
+<head>
+    <title>Demo</title>
+    <script language="javascript" src="Utils.js"></script>
+    <script language="javascript" src="paintService.js"></script>
+    <script language="javascript" src="dataService.js"></script>
+    
+    <style type="text/css">
+       
+    </style>
+</head>
+<body style="height:100%">
+    <div id="m">
+        <a href="#" onclick="toggle(this);">Press</a><br/>
+        <span id="m1"></span>
+    </div>
+    
+    
+    <div  style="position:absolute;left:10%;top:10%;bottom:10%;right:10%;border:1px solid #808080;padding:10px">
+            <div style="display:table;width:100%;min-height:100%  ">
+                <div style="display:table-row;height:100%;">
+                    <div style="display:table-cell;height:100%;border:1px solid green">
+                        <canvas id="c" style="width:100%;height:100%;background-color: #EFEFEF">
+
+                        </canvas>
+
+                    </div>
+                    <div style="display:table-cell;width:5px;"></div>
+                    <div style="display:table-cell;width:300px;vertical-align:top" >
+                        <div style="border:1px solid green;max-height:240px;min-height:240px;overflow-y:auto;font-family: Consolas, monaco, monospace;font-size: 12px;" id="info">
+                            HELLO OR OT
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+
+<script language="javascript">
+
+    var ps=createPaintService(document.getElementById('c'),onSelect);
+    var data = createDataService("http://192.168.1.20:8000/devices", 1, onData, onFail);
+    var HISTORY = 100;                                                                               // Max items of history per device
+    var display = document.getElementById('info');
+
+    function onFail() {
+        if (ps.timer) ps.stop();
+        document.getElementById("m").innerHTML = "Too many fails fetching data. Reload page";
+    }
+
+    function onData(data) {
+        var o = data.devices;
+        document.getElementById("m1").innerText = " Got " + o.length + " devices";
+        for (var i = 0; i < o.length; i++) {                                                            // Loop all received devices
+            var n = o[i];                                                                               // Current device
+            var d = devices[n.mac];                                                                     // Get device record for current
+            if (!devices[n.mac]) {
+                d = { last: "0", mac: n.mac, kind: n.kind, info: n.info, vendor: n.vendor, h: [] };               // Create device record
+                devices[n.mac] = d;                                                                     // Keep a reference of device record to list of devices
+            }
+            if (n.last > d.last) {                                                                      // If this signal had not been detected then 
+                d.last = n.last;                                                                        // Update device last time stamp
+                d.h.push([n.last, n.signal]);                                                           // Add to list of signals for the device
+                while (d.h.length > HISTORY) d.h.shift();                                               // No more than N elementos of HISTORY
+            }
+        }
+    }
+
+    function onSelect(device) {
+        info.innerHTML = device.mac + "<br>Kind: " + device.kind + "<br>Vendor: " + device.vendor + "<br>Networks: " + device.info + "<br>&nbsp;<br>";
+        var l = device.h.length - 1;
+        while (l >= 0) {
+            info.innerHTML = info.innerHTML + device.h[l][0] + " " + device.h[l][1] + " dB<br>";
+            l = l - 1;
+        }
+    }
+
+    function toggle(a) {
+        if (ps.timer) {
+            ps.stop();
+            data.stop();
+            a.innerText = "Start";
+        } else {
+            ps.start();
+            data.start();
+            a.innerText = "Stop";
+        }
+    }
+</script>
+
+</body>
+</html>

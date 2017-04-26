@@ -1,0 +1,82 @@
+<html>
+<head>
+    <title>Demo</title>
+    <script language="javascript" src="data.js"></script>
+    <script language="javascript" src="Utils.js"></script>
+    <script language="javascript" src="paintService.js"></script>
+    <script language="javascript" src="dataService.js"></script>
+    
+</head>
+<body>
+    <div style="vertical-align:top">
+        <div style="display:inline-block;position:relative;margin-top:80px;width:50%;height:80%;border:1px solid green">
+            <div style="border:1px solid blue;position:absolute;left:0;top:0;right:0;bottom:0;padding:4px">
+                <div style="position:absolute;border:1px solid red;height:50px;left:4px;right:4px;padding:5px">
+                    Time: <span id="time"></span><br />
+                    Items: <span id="items"></span><br />
+                    <div onclick="toggleState(this);">Click</div>
+                </div>
+                <div style="border:1px solid green;position:absolute;bottom:4px;left:4px;right:4px;top:68px;padding:5px" id="tc">
+                    <canvas id='c' style='width:100%;height:100%;'></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:inline-block;position:relative;margin-top:80px;width:250px;height:80%;border:1px solid green;padding-top:54px" id="display">
+        </div>
+    </div>
+
+<script language="javascript">
+
+    var data = null;
+    var nfails = 0;
+    var HISTORY = 10;                                                                               // Max items of history per device
+
+    var enabled=false;
+    var tlabel = document.getElementById("time");
+    var ilabel = document.getElementById("items");
+
+    var htmlCanvas = document.getElementById('c');                                                  // This is the canvas
+    var draw = createPaintService(htmlCanvas, 5,1);                                                   // Create a draw service, that draws on Canvas and has markers every 5 seconds
+    var data = createDataService("http://192.168.1.20:8000/devices", 1, onData, onFail);
+
+    function toggleState(ct) {                                                                      // On-Off button
+        enabled = !enabled;                                                                         // Toggle enabled state
+        tlabel.innerText = enabled ? "ON":"OFF";                                                    // Set text
+        if (enabled) {
+            data.start();
+            draw.start();
+        } else {
+            data.stop();
+            draw.stop();
+        }
+        //if (enabled) fecthData();                                                                   // If enabled then start fetching data
+        //draw.background(getTimeCursor());                                                               // Draw current background
+    }
+
+    function onFail() {
+        ilabel.innerHTML = "Too many fails";
+    }
+
+    function onData(data) {
+        ilabel.innerHTML = " Got " + data.devices.length + " devices";
+        var o = data.devices;
+        for (var i = 0; i < o.length; i++) {                                                            // Loop all received devices
+            var n = o[i];                                                                               // Current device
+            var d = devices[n.mac];                                                                     // Get device record for current
+            if (!devices[n.mac]) {
+                d = { last:"0", mac:n.mac,kind:n.kind,info:n.info,vendor:n.vendor, h:[]};               // Create device record
+                devices[n.mac] = d;                                                                     // Keep a reference of device record to list of devices
+            }
+            if (n.last > d.last) {                                                                      // If this signal had not been detected then 
+                d.last = n.last;                                                                        // Update device last time stamp
+                d.h.push([n.last, n.signal]);                                                           // Add to list of signals for the device
+                while (d.h.length > HISTORY) d.h.shift();                                               // No more than N elementos of HISTORY
+            }
+        }
+    }
+
+</script>
+
+</body>
+</html>
