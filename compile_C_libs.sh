@@ -35,8 +35,8 @@ function compile_libs {
     printf "done\n"
 }
 
-#compile_osdeps
-#compile_libs
+# compile_osdeps
+# compile_libs
 
 gcc -g -w  -O3  -DOLD_SSE_CORE=1 -pthread -D_FILE_OFFSET_BITS=64 -D_REVISION=0  -DCONFIG_LIBNL  -fstack-protector-strong -Wno-unused-but-set-variable -Wno-array-bounds -Iinclude  -c -o main.o main.c 
 gcc -g -w  -O3  -DOLD_SSE_CORE=1 -pthread -D_FILE_OFFSET_BITS=64 -D_REVISION=0  -DCONFIG_LIBNL  -fstack-protector-strong -Wno-unused-but-set-variable -Wno-array-bounds -Iinclude  -c -o devices.o devices.c 
