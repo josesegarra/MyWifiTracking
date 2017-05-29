@@ -1,6 +1,7 @@
 # MyWifiTracking
 
-##Overview
+Overview
+========
 
 There are situations where tracking the movement of people within the boundaries of a facility can be very convenient 
 for a number of different reasons. Some examples:
@@ -25,7 +26,8 @@ And finally, although strictly they are not required system needs, there are com
 * Be easy and cheap to maintain: detecting & replacing failing parts 
 * Be easy to build: time, skills and resources needed 
 
-##Objective
+Objective
+=========
 
 Many people today carry a mobile smartphone, and most of these smartphones include a Wi-Fi client. This project uses the behavior of these Wi-Fi clients to implement the tracking.
 
@@ -40,7 +42,8 @@ Although false positives (detecting a device when it is not there) are not possi
 Another limitation is that not every person has a phone, not every phone is a smartphone, and not every smartphone has its Wi-Fi client enabled. Client Wi-Fi assurance is a must for the system to work, otherwise it can lead to false negatives (not detecting a device when it is there). 
 The frequency at which Beacon Frames are sent depends on the specific device (model, OS, version,...). Most of the models have a 2 /3 cycle per minute. This gives a 20/30 seconds timeframe for detection. 
 
-##Implementation
+Implementation
+==============
 
 The project implements the described detector using a Raspberry Pi Model 2. This tracking system is made of:
 
